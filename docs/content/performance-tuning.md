@@ -1,6 +1,8 @@
 ---
 layout: docs
-permalink: connectors/elasticsearch-2.2/performance-tuning.html
+permalink: connectors/elasticsearch/performance-tuning.html
+redirect_from:
+  - connectors/elasticsearch-2.2/performance-tuning.html
 ---
 
 You can tune the performance of your Couchbase-Elasticsearch data-replication system, by adjusting the number of Couchbase document-fields or documents that you wish to index; by adding nodes to your Elasticsearch cluster; and by changing Couchbase XDCR parameters. This section describes the available options.

@@ -1,6 +1,8 @@
 ---
 layout: docs
-permalink: connectors/elasticsearch-2.2/release-notes.html
+permalink: connectors/elasticsearch/release-notes.html
+redirect_from:
+  - connectors/elasticsearch-2.2/release-notes.html
 ---
 
 This section provides a set of Release Notes for successive versions of the Elasticsearch Transport Plug-in, provided by Couchbase. Each set of notes provide details of changes and additions that have been made.

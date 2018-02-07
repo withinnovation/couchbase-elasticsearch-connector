@@ -1,6 +1,8 @@
 ---
 layout: docs
-permalink: connectors/elasticsearch-2.2/troubleshooting.html
+permalink: connectors/elasticsearch/troubleshooting.html
+redirect_from:
+  - connectors/elasticsearch-2.2/troubleshooting.html
 ---
 
 The most common problems that occur in the context of the Couchbase-Elasticsearch data-replication system are `data-transfer failure` and `data-indexing failure`. This section describes procedures whereby you can monitor system-health; determine causes of failure; and fix problems.

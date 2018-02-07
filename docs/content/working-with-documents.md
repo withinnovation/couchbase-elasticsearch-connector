@@ -1,6 +1,8 @@
 ---
 layout: docs
-permalink: connectors/elasticsearch-2.2/working-with-documents.html
+permalink: connectors/elasticsearch/working-with-documents.html
+redirect_from:
+  - connectors/elasticsearch-2.2/working-with-documents.html
 ---
 
 Couchbase documents can be of arbitrary complexity. However, if they are to be searched on by means of Elasticsearch, you should specifically design them for trouble-free replication and retrieval. This section details a number of important design-issues, and also provides an overview of the different forms of _meta-data_ used by Couchbase Server and Elasticsearch.
