@@ -1,5 +1,7 @@
 = Couchbase Elasticsearch Connector
 
+**Parent-child routing** feature added by https://github.com/mashhur[mik] to couchbase-elasticsearch-connector 4.0.
+
 https://docs.couchbase.com/elasticsearch-connector/4.0/release-notes.html[*Download*]
 | https://docs.couchbase.com/elasticsearch-connector/4.0/index.html[*Documentation*]
 | https://issues.couchbase.com/projects/CBES[*Issues*]
