@@ -16,16 +16,13 @@
 
 package com.couchbase.connector.config.es;
 
+import com.couchbase.client.deps.io.netty.util.internal.StringUtil;
 import com.couchbase.connector.config.ConfigException;
 import com.couchbase.connector.dcp.Event;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import net.consensys.cava.toml.TomlPosition;
 import net.consensys.cava.toml.TomlTable;
 import org.immutables.value.Value;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.regex.Matcher;
@@ -50,12 +47,12 @@ public interface TypeConfig {
   boolean ignoreDeletes();
 
   @Nullable
-  String parent();
+  String routing(); // may be null, only for custom routing
 
   IndexMatcher indexMatcher();
 
   @Nullable
-  ParentMatcher parentMatcher();
+  RoutingMatcher routingMatcher(); // may be null, only for custom routing
 
   @Value.Auxiliary
   @Nullable
@@ -69,7 +66,7 @@ public interface TypeConfig {
   }
 
   static ImmutableTypeConfig from(TomlTable config, TomlPosition position, TypeConfig defaults) {
-    expectOnly(config, "typeName", "index", "pipeline", "ignore", "ignoreDeletes", "prefix", "regex", "parent");
+    expectOnly(config, "typeName", "index", "pipeline", "ignore", "ignoreDeletes", "prefix", "regex", "routing");
 
     final String index = Strings.emptyToNull(config.getString("index", defaults::index));
     ImmutableTypeConfig.Builder builder = ImmutableTypeConfig.builder()
@@ -79,7 +76,7 @@ public interface TypeConfig {
         .pipeline(Strings.emptyToNull(config.getString("pipeline", defaults::pipeline)))
         .ignoreDeletes(config.getBoolean("ignoreDeletes", defaults::ignoreDeletes))
         .ignore(config.getBoolean("ignore", defaults::ignore))
-        .parent(config.getString("parent", defaults::parent));
+        .routing(config.getString("routing", defaults::routing));
 
     final String idPrefix = config.getString("prefix");
     final String idRegex = config.getString("regex");
@@ -106,9 +103,9 @@ public interface TypeConfig {
       }
     }
 
-    final String parent = config.getString("parent");
-    if (Strings.isNullOrEmpty(parent) == false)
-      builder.parentMatcher(new ValueParentMatcher(parent));
+    final String routing = config.getString("routing");
+    if (Strings.isNullOrEmpty(routing) == false)
+      builder.routingMatcher(new IdRoutingMatcher(routing));
 
     return builder.build();
   }
@@ -117,8 +114,8 @@ public interface TypeConfig {
     String getIndexIfMatches(Event event);
   }
 
-  interface ParentMatcher {
-    String getParentIfMatches(Event event);
+  interface RoutingMatcher {
+    String getRoutingIfMatches(Event event);
   }
 
   class IdPrefixMatcher implements IndexMatcher {
@@ -180,31 +177,20 @@ public interface TypeConfig {
     }
   }
 
-  class ValueParentMatcher implements ParentMatcher {
+  class IdRoutingMatcher implements RoutingMatcher {
+    private final String routing;
 
-    private static final ObjectMapper mapper = new ObjectMapper();
-    private static final Logger log = LoggerFactory.getLogger(ValueParentMatcher.class);
-
-    private final String parent;
-
-    public ValueParentMatcher(String parent) {
-      this.parent = requireNonNull(parent);
+    public IdRoutingMatcher(String routing) {
+      this.routing = requireNonNull(routing);
     }
 
     @Override
-    public String getParentIfMatches(Event event) {
-      // TODO: performance improvement required, expensive readTree conversion
-      // DocumentTransformer can be used?
-      try {
-        JsonNode node = mapper.readTree(event.getContent());
-        if(node != null)
-          node = node.get(this.parent);
-        return node.get("parent").textValue();
-      } catch (Exception ex) {
-        // either doc deleted or parent field couldn't parsed
-        log.info("Join field defined but parent not found. ", ex.getMessage());
-        return "";
-      }
+    public String getRoutingIfMatches(Event event) {
+      if (Strings.isNullOrEmpty(event.getKey()) == true)
+        return StringUtil.EMPTY_STRING;
+
+      String[] parts = event.getKey().split(this.routing);
+      return parts.length > 1 ? parts[1] : StringUtil.EMPTY_STRING;
     }
   }
 }
